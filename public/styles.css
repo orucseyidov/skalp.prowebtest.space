@@ -1,0 +1,45 @@
+body {
+  background-color: #0b1220;
+  color: #e2e8f0;
+}
+#tvchart {
+  width: 100%;
+}
+.card { background-color: #111827; }
+.navbar { background-color: #0f172a !important; }
+.form-control, .form-select { background-color: #0b1220; color: #e2e8f0; border-color: #334155; }
+.form-control:focus, .form-select:focus { box-shadow: none; border-color: #64748b; }
+.form-switch{cursor: pointer;}
+
+/* Responsive tweaks */
+@media (max-width: 576px) {
+  .navbar .container-fluid > .d-flex {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  /* Make selects and inputs full width on very small screens */
+  #symbol,
+  #interval,
+  #limit,
+  #btnLoad {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  /* Reduce chart heights for small screens */
+  #tvchart { height: 360px !important; }
+  #rsichart { height: 120px !important; }
+
+  /* Card paddings compact */
+  .card-body { padding: 0.75rem; }
+
+  /* Inline controls stack nicely */
+  .card .d-flex.flex-wrap.gap-3 { gap: 0.5rem !important; }
+}
+
+@media (max-width: 360px) {
+  #tvchart { height: 300px !important; }
+  #rsichart { height: 100px !important; }
+}
+

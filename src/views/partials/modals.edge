@@ -1,0 +1,70 @@
+<!-- Profile Offcanvas (right) -->
+    <div class="offcanvas offcanvas-end text-bg-dark" tabindex="-1" id="offcanvasProfile" aria-labelledby="offcanvasProfileLabel" style="width:380px;">
+      <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvasProfileLabel">Profilim</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      </div>
+      <div class="offcanvas-body">
+        <form id="profileForm" class="d-grid gap-3">
+          <div>
+            <label for="profile_full_name" class="form-label">Ad Soyad</label>
+            <input type="text" id="profile_full_name" class="form-control" required />
+          </div>
+          <div>
+            <label for="profile_email" class="form-label">Email</label>
+            <input type="email" id="profile_email" class="form-control" required />
+          </div>
+          <button class="btn btn-primary" type="submit">Yadda saxla</button>
+          <div id="profileMsg" class="small"></div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Settings Offcanvas (right) -->
+    <div class="offcanvas offcanvas-end text-bg-dark" tabindex="-1" id="offcanvasSettings" aria-labelledby="offcanvasSettingsLabel" style="width:420px;">
+      <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvasSettingsLabel">Ayarlar</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      </div>
+      <div class="offcanvas-body">
+        <form id="settingsForm" class="d-grid gap-3">
+          <div class="row g-2">
+            <div class="col-12"><label class="form-label">GPT Token</label><input id="gpt_token" class="form-control" /></div>
+            <div class="col-12"><label class="form-label">GPT Key</label><input id="gpt_key" class="form-control" /></div>
+            <div class="col-12"><label class="form-label">DeepSeek Token</label><input id="deepseek_token" class="form-control" /></div>
+            <div class="col-12"><label class="form-label">DeepSeek Key</label><input id="deepseek_key" class="form-control" /></div>
+            <div class="col-12"><label class="form-label">Binance Token</label><input id="binance_token" class="form-control" /></div>
+            <div class="col-12"><label class="form-label">Binance Key</label><input id="binance_key" class="form-control" /></div>
+            <div class="col-12"><label class="form-label">Binance User Code</label><input id="binance_user_code" class="form-control" /></div>
+          </div>
+          <button class="btn btn-primary" type="submit">Yadda saxla</button>
+          <div id="settingsMsg" class="small"></div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Change Password Offcanvas (right) -->
+    <div class="offcanvas offcanvas-end text-bg-dark" tabindex="-1" id="offcanvasPassword" aria-labelledby="offcanvasPasswordLabel" style="width:380px;">
+      <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvasPasswordLabel">Şifrəni dəyiş</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      </div>
+      <div class="offcanvas-body">
+        <form id="passwordForm" class="d-grid gap-3">
+          <div>
+            <label for="old_password" class="form-label">Köhnə şifrə</label>
+            <input type="password" id="old_password" class="form-control" required />
+          </div>
+          <div>
+            <label for="new_password" class="form-label">Yeni şifrə</label>
+            <input type="password" id="new_password" class="form-control" required />
+          </div>
+          <div>
+            <label for="confirm_password" class="form-label">Təkrar yeni şifrə</label>
+            <input type="password" id="confirm_password" class="form-control" required />
+          </div>
+          <button class="btn btn-primary" type="submit">Yadda saxla</button>
+          <div id="passwordMsg" class="small"></div>
+        </form>
+      </div>
+    </div>

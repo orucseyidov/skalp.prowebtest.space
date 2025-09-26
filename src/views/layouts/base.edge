@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="az" data-bs-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>@(title || 'Skalp Ticaret')</title>
+  @include('partials/head-extra')
+</head>
+<body>
+  @include('partials/header')
+  <main>
+    @!section('content')
+  </main>
+  @include('partials/modals')
+  @include('partials/footer')
+  @!section('scripts')
+</body>
+</html>
+

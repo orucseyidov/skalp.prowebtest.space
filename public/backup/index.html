@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="tr" data-bs-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Skalp Ticarət</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://unpkg.com/lightweight-charts@4.2.1/dist/lightweight-charts.standalone.production.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="/styles.css" />
+    <script>
+      // Auth guard: if not logged in, redirect to /login
+      (async function () {
+        try {
+          const r = await fetch('/auth/me', { credentials: 'same-origin' });
+          if (!r.ok) { window.location.href = '/login'; }
+        } catch (e) { window.location.href = '/login'; }
+      })();
+    </script>
+  </head>
+  <body>
+    <nav class="navbar navbar-dark bg-dark border-bottom">
+      <div class="container-fluid">
+        <span class="navbar-brand">Skalp Ticarət</span>
+        <div class="d-flex gap-2 align-items-center">
+          <select id="symbol" class="form-select form-select-sm" style="min-width:180px"></select>
+          <select id="interval" class="form-select form-select-sm" style="min-width:120px"></select>
+          <input id="limit" type="number" class="form-control form-control-sm" value="500" min="50" max="1000" step="50" style="width:100px" />
+          <button id="btnLoad" class="btn btn-sm btn-primary text-nowrap">Yüklə / Yenilə</button>
+          <div class="dropdown">
+            <button class="btn btn-sm dropdown-toggle d-flex align-items-center gap-2 text-light border-0 bg-transparent" id="profileMenu" data-bs-toggle="dropdown" aria-expanded="false" style="box-shadow:none;">
+              <span class="rounded-circle bg-primary text-white d-inline-flex justify-content-center align-items-center" style="width:28px; height:28px; font-weight:600; font-size:12px;">OS</span>
+              <span>Oruc Seyidov</span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark" aria-labelledby="profileMenu">
+              <li><h6 class="dropdown-header">Hesab</h6></li>
+              <li><a class="dropdown-item" href="#" id="btnOpenProfile">Profilim</a></li>
+              <li><a class="dropdown-item" href="#" id="btnOpenPassword">Şifrəni dəyiş</a></li>
+              <li><a class="dropdown-item" href="#" id="btnOpenSettings">Ayarlar</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="#" id="btnLogout">Çıxış</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Profile Offcanvas (right) -->
+    <div class="offcanvas offcanvas-end text-bg-dark" tabindex="-1" id="offcanvasProfile" aria-labelledby="offcanvasProfileLabel" style="width:380px;">
+      <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvasProfileLabel">Profilim</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      </div>
+      <div class="offcanvas-body">
+        <form id="profileForm" class="d-grid gap-3">
+          <div>
+            <label for="profile_full_name" class="form-label">Ad Soyad</label>
+            <input type="text" id="profile_full_name" class="form-control" required />
+          </div>
+          <div>
+            <label for="profile_email" class="form-label">Email</label>
+            <input type="email" id="profile_email" class="form-control" required />
+          </div>
+          <button class="btn btn-primary" type="submit">Yadda saxla</button>
+          <div id="profileMsg" class="small"></div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Settings Offcanvas (right) -->
+    <div class="offcanvas offcanvas-end text-bg-dark" tabindex="-1" id="offcanvasSettings" aria-labelledby="offcanvasSettingsLabel" style="width:420px;">
+      <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvasSettingsLabel">Ayarlar</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      </div>
+      <div class="offcanvas-body">
+        <form id="settingsForm" class="d-grid gap-3">
+          <div class="row g-2">
+            <div class="col-12"><label class="form-label">GPT Token</label><input id="gpt_token" class="form-control" /></div>
+            <div class="col-12"><label class="form-label">GPT Key</label><input id="gpt_key" class="form-control" /></div>
+            <div class="col-12"><label class="form-label">DeepSeek Token</label><input id="deepseek_token" class="form-control" /></div>
+            <div class="col-12"><label class="form-label">DeepSeek Key</label><input id="deepseek_key" class="form-control" /></div>
+            <div class="col-12"><label class="form-label">Binance Token</label><input id="binance_token" class="form-control" /></div>
+            <div class="col-12"><label class="form-label">Binance Key</label><input id="binance_key" class="form-control" /></div>
+            <div class="col-12"><label class="form-label">Binance User Code</label><input id="binance_user_code" class="form-control" /></div>
+          </div>
+          <button class="btn btn-primary" type="submit">Yadda saxla</button>
+          <div id="settingsMsg" class="small"></div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Change Password Offcanvas (right) -->
+    <div class="offcanvas offcanvas-end text-bg-dark" tabindex="-1" id="offcanvasPassword" aria-labelledby="offcanvasPasswordLabel" style="width:380px;">
+      <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvasPasswordLabel">Şifrəni dəyiş</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      </div>
+      <div class="offcanvas-body">
+        <form id="passwordForm" class="d-grid gap-3">
+          <div>
+            <label for="old_password" class="form-label">Köhnə şifrə</label>
+            <input type="password" id="old_password" class="form-control" required />
+          </div>
+          <div>
+            <label for="new_password" class="form-label">Yeni şifrə</label>
+            <input type="password" id="new_password" class="form-control" required />
+          </div>
+          <div>
+            <label for="confirm_password" class="form-label">Təkrar yeni şifrə</label>
+            <input type="password" id="confirm_password" class="form-control" required />
+          </div>
+          <button class="btn btn-primary" type="submit">Yadda saxla</button>
+          <div id="passwordMsg" class="small"></div>
+        </form>
+      </div>
+    </div>
+
+    <!-- inline indicators bar -->
+    <div class="container-fluid py-2">
+      <div class="card">
+        <div class="card-body">
+          <div class="row">
+            <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
+              <!-- Digər ayarlar (boş) -->
+              <div class="d-flex flex-wrap gap-3 align-items-start small">
+                <div class="form-check form-switch m-0">
+                  <input class="form-check-input" type="checkbox" id="aoutoReloadToggle">
+                  <label class="form-check-label" for="aoutoReloadToggle" data-bs-toggle="tooltip" title="Əgər bu açıqdırsa seçilmiş zaman çərçivəsində yenilənəcək">
+                    Yeniləmə
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-8 col-md-8 col-sm-12 col-xs-12">
+              <div class="d-flex flex-wrap gap-3 align-items-end small">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="form-check form-switch m-0">
+                    <input class="form-check-input" type="checkbox" id="rsiToggle" checked>
+                    <label class="form-check-label" for="rsiToggle" data-bs-toggle="tooltip" title="RSI – 0-100 şkalası; 30 aşırı satım, 70 aşırı alış zonası.">RSI</label>
+                  </div>
+                  <input type="number" id="rsiPeriod" class="form-control form-control-sm" value="14" min="2" max="100" style="width:90px" />
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                  <div class="form-check form-switch m-0">
+                    <input class="form-check-input" type="checkbox" id="ma7Toggle" checked>
+                    <label class="form-check-label" for="ma7Toggle" data-bs-toggle="tooltip" title="MA 7 – qısa müddətli trend izləyici.">MA 7</label>
+                  </div>
+                  <input type="number" id="ma7Period" class="form-control form-control-sm" value="7" min="2" max="300" style="width:90px" />
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                  <div class="form-check form-switch m-0">
+                    <input class="form-check-input" type="checkbox" id="ma25Toggle" checked>
+                    <label class="form-check-label" for="ma25Toggle" data-bs-toggle="tooltip" title="MA 25 – orta müddətli istiqamət.">MA 25</label>
+                  </div>
+                  <input type="number" id="ma25Period" class="form-control form-control-sm" value="25" min="2" max="500" style="width:90px" />
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                  <div class="form-check form-switch m-0">
+                    <input class="form-check-input" type="checkbox" id="ma99Toggle" checked>
+                    <label class="form-check-label" for="ma99Toggle" data-bs-toggle="tooltip" title="MA 99 – uzun müddətli meyl.">MA 99</label>
+                  </div>
+                  <input type="number" id="ma99Period" class="form-control form-control-sm" value="99" min="2" max="1000" style="width:90px" />
+                </div>
+                <div class="form-check form-switch m-0">
+                  <input class="form-check-input" type="checkbox" id="emaMode" checked>
+                  <label class="form-check-label" for="emaMode" data-bs-toggle="tooltip" title="EMA – eksponensial hərəkətli orta; söndürsəniz SMA tətbiq olunur.">EMA</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container-fluid pb-3">
+      <div class="row g-3">
+        <div class="col-12 col-lg-3">
+          <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <span>Skalp Tövsiyələri</span>
+              <div class="d-flex align-items-center gap-2">
+                <label for="scalpTf" class="form-label m-0 small visually-hidden">Zaman çərçivəsi</label>
+                <select id="scalpTf" class="form-select form-select-sm" data-bs-toggle="tooltip" title="Zaman çərçivəsi: Skalp hesablaması üçün istifadə olunan period">
+                  <option value="30s" selected>30s</option>
+                  <option value="1m">1m</option>
+                  <option value="3m">3m</option>
+                  <option value="5m">5m</option>
+                  <option value="1h">1h</option>
+                  <option value="2h">2h</option>
+                  <option value="3h">3h</option>
+                  <option value="5h">5h</option>
+                  <option value="10h">10h</option>
+                  <option value="1d">1d</option>
+                  <option value="2d">2d</option>
+                  <option value="3d">3d</option>
+                </select>
+                <span id="scalpLoading" class="spinner-border spinner-border-sm text-light d-none" role="status"></span>
+              </div>
+            </div>
+            <div class="card-body small" id="scalpPanel">
+              <div><strong>Mənbə:</strong> <span id="scalpMode">-</span></div>
+              <div><strong>Trendlər:</strong> <span id="scalpTrend">-</span></div>
+              <div><strong>Son siqnal:</strong> <span id="scalpSignal">-</span></div>
+              <div class="mt-2" id="scalpSuggestion"></div>
+              <div class="mt-2" id="scalpContext"></div>
+              <div class="text-warning mt-2">Tövsiyələr avtomatikdir; komissiya və slippage daxil deyil.</div>
+              <button id="btnScalpRefresh" class="btn btn-secondary btn-sm mt-2">İndi Yenilə</button>
+            </div>
+          </div>
+          <div class="card mt-3">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <span>AI Analizi (DeepSeek)</span>
+              <div class="d-flex align-items-center gap-2">
+                <button id="btnAiAnalyze" class="btn btn-sm btn-outline-light">Analizi yenilə</button>
+                <span id="aiLoading" class="spinner-border spinner-border-sm text-light d-none" role="status"></span>
+              </div>
+            </div>
+            <div class="card-body small">
+              <div id="aiAnalysis" style="white-space:pre-wrap">-</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-12 col-lg-9">
+          <div id="chartContainer" class="card">
+            <div class="card-body p-1">
+              <div id="tvchart" style="height:520px;"></div>
+              <div id="rsichart" style="height:140px; margin-top:6px;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+      <div id="appToast" class="toast text-bg-danger" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body" id="toastMsg">Xəta</div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+      </div>
+    </div>
+
+    <script src="/app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      (function(){
+        const ocProfile = new bootstrap.Offcanvas('#offcanvasProfile');
+        const ocSettings = new bootstrap.Offcanvas('#offcanvasSettings');
+        const ocPassword = new bootstrap.Offcanvas('#offcanvasPassword');
+
+        document.getElementById('btnOpenProfile').addEventListener('click', async function(e){
+          e.preventDefault();
+          try {
+            const r = await fetch('/api/me/profile');
+            if (r.ok) {
+              const { data } = await r.json();
+              document.getElementById('profile_full_name').value = data.full_name || '';
+              document.getElementById('profile_email').value = data.email || '';
+            }
+          } catch(_){}
+          ocProfile.show();
+        });
+
+        document.getElementById('profileForm').addEventListener('submit', async function(e){
+          e.preventDefault();
+          const msg = document.getElementById('profileMsg');
+          msg.textContent=''; msg.className='small';
+          const payload = {
+            full_name: document.getElementById('profile_full_name').value.trim(),
+            email: document.getElementById('profile_email').value.trim()
+          };
+          try {
+            const r = await fetch('/api/me/profile', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+            if (!r.ok) throw new Error('Yadda saxlanmadı');
+            msg.textContent='Yadda saxlandı'; msg.classList.add('text-success');
+          } catch(err){ msg.textContent=err.message; msg.classList.add('text-danger'); }
+        });
+
+        document.getElementById('btnOpenSettings').addEventListener('click', async function(e){
+          e.preventDefault();
+          try {
+            const r = await fetch('/api/me/settings');
+            if (r.ok) {
+              const { data } = await r.json();
+              ['gpt_token','gpt_key','deepseek_token','deepseek_key','binance_token','binance_key','binance_user_code']
+                .forEach(k => { const el = document.getElementById(k); if (el) el.value = data?.[k] || ''; });
+            }
+          } catch(_){}
+          ocSettings.show();
+        });
+
+        document.getElementById('btnOpenPassword').addEventListener('click', function(e){
+          e.preventDefault();
+          document.getElementById('old_password').value = '';
+          document.getElementById('new_password').value = '';
+          document.getElementById('confirm_password').value = '';
+          document.getElementById('passwordMsg').textContent = '';
+          document.getElementById('passwordMsg').className = 'small';
+          ocPassword.show();
+        });
+
+        document.getElementById('passwordForm').addEventListener('submit', async function(e){
+          e.preventDefault();
+          const msg = document.getElementById('passwordMsg');
+          msg.textContent=''; msg.className = 'small';
+          const payload = {
+            oldPassword: document.getElementById('old_password').value,
+            newPassword: document.getElementById('new_password').value,
+            confirmPassword: document.getElementById('confirm_password').value
+          };
+          try {
+            const r = await fetch('/api/me/password', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+            const data = await r.json();
+            if (!r.ok || data.success === false) throw new Error(data.message || 'Yadda saxlanmadı');
+            msg.textContent = 'Şifrə yeniləndi';
+            msg.classList.add('text-success');
+          } catch(err){
+            msg.textContent = err.message;
+            msg.classList.add('text-danger');
+          }
+        });
+
+        document.getElementById('settingsForm').addEventListener('submit', async function(e){
+          e.preventDefault();
+          const msg = document.getElementById('settingsMsg');
+          msg.textContent=''; msg.className='small';
+          const payload = {
+            gpt_token: document.getElementById('gpt_token').value || null,
+            gpt_key: document.getElementById('gpt_key').value || null,
+            deepseek_token: document.getElementById('deepseek_token').value || null,
+            deepseek_key: document.getElementById('deepseek_key').value || null,
+            binance_token: document.getElementById('binance_token').value || null,
+            binance_key: document.getElementById('binance_key').value || null,
+            binance_user_code: document.getElementById('binance_user_code').value || null,
+          };
+          try {
+            const r = await fetch('/api/me/settings', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+            if (!r.ok) throw new Error('Yadda saxlanmadı');
+            msg.textContent='Yadda saxlandı'; msg.classList.add('text-success');
+          } catch(err){ msg.textContent=err.message; msg.classList.add('text-danger'); }
+        });
+
+        document.getElementById('btnLogout').addEventListener('click', async function(e){
+          e.preventDefault();
+          try { await fetch('/auth/logout', { method:'POST' }); } catch(_){ }
+          window.location.href = '/login';
+        });
+      })();
+    </script>
+  </body>
+  </html>
+
+
