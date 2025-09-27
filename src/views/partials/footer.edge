@@ -1,5 +1,5 @@
 <footer class="text-center text-muted py-4">
-  <small>© @(new Date().getFullYear()) Skalp</small>
+  <small>© {{ new Date().getFullYear() }} Skalp</small>
 </footer>
 
 
@@ -15,6 +15,32 @@
 <script src="/app.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<style>
+  .collapse-icon {
+    transition: transform 0.3s ease;
+  }
+  .collapsed .collapse-icon {
+    transform: rotate(-90deg);
+  }
+</style>
+<script>
+  // Collapse icon rotation
+  document.addEventListener('DOMContentLoaded', function() {
+    const collapseElements = document.querySelectorAll('[data-bs-toggle="collapse"]');
+    collapseElements.forEach(function(element) {
+      element.addEventListener('click', function() {
+        const target = document.querySelector(this.getAttribute('data-bs-target'));
+        const icon = this.querySelector('.collapse-icon');
+        
+        if (target.classList.contains('show')) {
+          icon.style.transform = 'rotate(-90deg)';
+        } else {
+          icon.style.transform = 'rotate(0deg)';
+        }
+      });
+    });
+  });
+</script>
 <script>
   (function(){
     const ocProfile = new bootstrap.Offcanvas('#offcanvasProfile');

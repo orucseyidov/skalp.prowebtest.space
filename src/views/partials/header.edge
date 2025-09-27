@@ -1,23 +1,55 @@
-<nav class="navbar navbar-dark bg-dark border-bottom">
+<nav class="navbar navbar-dark bg-dark border-bottom navbar-expand-lg">
   <div class="container-fluid">
-    <div class="d-flex align-items-center">
-      <span class="navbar-brand">Skalp Ticarət</span>
-      <ul class="navbar-nav flex-row ms-3">
-        <li class="nav-item me-3">
-          <a class="nav-link {{ request.url === '/' ? 'active' : '' }}" href="/">Ana Səhifə</a>
+    <!-- Brand - mobilde qisaldilmis -->
+    <span class="navbar-brand d-none d-sm-inline">Skalp Ticarət</span>
+    <span class="navbar-brand d-sm-none">ST</span>
+    
+    <!-- Mobile right side buttons -->
+    <div class="d-flex align-items-center gap-2 d-lg-none">
+      <!-- Profile button - mobile only -->
+      <div class="dropdown">
+        <button class="btn btn-sm dropdown-toggle d-flex align-items-center gap-1 text-light border-0 bg-transparent" id="profileMenuMobile" data-bs-toggle="dropdown" aria-expanded="false" style="box-shadow:none;">
+          <span class="rounded-circle bg-primary text-white d-inline-flex justify-content-center align-items-center" style="width:28px; height:28px; font-weight:600; font-size:12px;">OS</span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark" aria-labelledby="profileMenuMobile">
+          <li><h6 class="dropdown-header">Hesab</h6></li>
+          <li><a class="dropdown-item" href="#" id="btnOpenProfileMobile">Profilim</a></li>
+          <li><a class="dropdown-item" href="#" id="btnOpenPasswordMobile">Şifrəni dəyiş</a></li>
+          <li><a class="dropdown-item" href="#" id="btnOpenSettingsMobile">Ayarlar</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item" href="#" id="btnLogoutMobile">Çıxış</a></li>
+        </ul>
+      </div>
+      
+      <!-- Hamburger menu button -->
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+    </div>
+    
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <!-- Navigation links -->
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item">
+          <a class="nav-link {{ currentPage === 'home' ? 'active' : '' }}" href="/">Ana Səhifə</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link {{ request.url === '/test' ? 'active' : '' }}" href="/test">Skalp Test Səhifəsi</a>
+          <a class="nav-link {{ currentPage === 'test' ? 'active' : '' }}" href="/test">Test</a>
         </li>
       </ul>
-    </div>
-    <div class="d-flex gap-2 align-items-center">
-      <select id="symbol" class="form-select form-select-sm" style="min-width:180px"></select>
-      <select id="interval" class="form-select form-select-sm" style="min-width:120px"></select>
-      <input id="limit" type="number" class="form-control form-control-sm" value="500" min="50" max="1000" step="50" style="width:100px" />
-      <button id="btnLoad" class="btn btn-sm btn-primary text-nowrap">Yüklə / Yenilə</button>
-      <div class="dropdown">
-        <button class="btn btn-sm dropdown-toggle d-flex align-items-center gap-2 text-light border-0 bg-transparent" id="profileMenu" data-bs-toggle="dropdown" aria-expanded="false" style="box-shadow:none;">
+      
+      <!-- Trading controls - desktop only -->
+      <div class="d-none d-lg-flex gap-2 align-items-center me-3">
+        <select id="symbol" class="form-select form-select-sm" style="min-width:120px"></select>
+        <select id="interval" class="form-select form-select-sm" style="min-width:80px"></select>
+        <input id="limit" type="number" class="form-control form-control-sm" value="500" min="50" max="1000" step="50" style="width:80px" />
+        <button id="btnLoad" class="btn btn-sm btn-primary text-nowrap">Yüklə</button>
+      </div>
+      
+      <!-- Profile dropdown - desktop only -->
+      <div class="dropdown d-none d-lg-block">
+        <button class="btn btn-sm dropdown-toggle d-flex align-items-center gap-1 text-light border-0 bg-transparent" id="profileMenu" data-bs-toggle="dropdown" aria-expanded="false" style="box-shadow:none;">
           <span class="rounded-circle bg-primary text-white d-inline-flex justify-content-center align-items-center" style="width:28px; height:28px; font-weight:600; font-size:12px;">OS</span>
           <span>Oruc Seyidov</span>
         </button>
@@ -33,3 +65,29 @@
     </div>
   </div>
 </nav>
+
+<!-- Mobile trading controls - shown only on mobile -->
+<div class="d-lg-none bg-dark border-bottom p-2">
+  <div class="container-fluid">
+    <div class="row g-2">
+      <div class="col-6">
+        <select id="symbolMobile" class="form-select form-select-sm">
+          <option>SOLUSDT</option>
+        </select>
+      </div>
+      <div class="col-3">
+        <select id="intervalMobile" class="form-select form-select-sm">
+          <option>1m</option>
+        </select>
+      </div>
+      <div class="col-3">
+        <input id="limitMobile" type="number" class="form-control form-control-sm" value="500" min="50" max="1000" step="50" />
+      </div>
+    </div>
+    <div class="row mt-2">
+      <div class="col-12">
+        <button id="btnLoadMobile" class="btn btn-sm btn-primary w-100">Yüklə / Yenilə</button>
+      </div>
+    </div>
+  </div>
+</div>

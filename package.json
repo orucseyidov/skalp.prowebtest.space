@@ -8,27 +8,32 @@
     "start:api": "node server.cjs",
     "dev": "nodemon server.cjs",
     "lint": "eslint \"src/**/*.js\"",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "migrate": "node src/database/migrate.js up",
+    "migrate:rollback": "node src/database/migrate.js down",
+    "seed": "node src/database/seed.js up",
+    "seed:rollback": "node src/database/seed.js down",
+    "db:setup": "npm run migrate && npm run seed",
+    "postinstall": "npm run db:setup"
   },
   "dependencies": {
     "axios": "1.7.7",
-    "cors": "2.8.5",
-    "express": "4.19.2",
-    "express-rate-limit": "7.4.1",
-    "mysql2": "3.11.3",
     "bcrypt": "5.1.1",
-    "express-session": "1.17.3",
+    "cors": "2.8.5",
     "dotenv": "16.4.5",
+    "express": "4.19.2",
+    "express-edge": "^3.0.0",
+    "express-rate-limit": "7.4.1",
+    "express-session": "1.17.3",
     "joi": "17.13.3",
-    "morgan": "1.10.0"
+    "morgan": "1.10.0",
+    "mysql2": "3.11.3"
   },
   "devDependencies": {
     "eslint": "8.57.0",
     "eslint-config-prettier": "9.1.0",
     "eslint-plugin-node": "11.1.0",
-    "prettier": "3.3.3",
-    "nodemon": "3.1.4"
+    "nodemon": "3.1.4",
+    "prettier": "3.3.3"
   }
 }
-
-
