@@ -15,6 +15,7 @@ Bu qovluq bütün JavaScript fayllarını ehtiva edir.
   - Auto-reload functionality
   - **Utility functions**: showSuccess, showError, showLoading, confirmAction
   - **Cache management**: setupCacheClearButton (bütün səhifələrdə işləyir)
+  - **UI animations**: setupCollapseIcons (collapse icon rotations)
 
 ### `home.js`
 - **Məqsəd**: Home səhifəsinə xas JavaScript funksionallığı
@@ -23,6 +24,16 @@ Bu qovluq bütün JavaScript fayllarını ehtiva edir.
   - AI analysis functions (refreshAI)
   - Home page specific event listeners
   - Scalp loading management
+
+### `user.js`
+- **Məqsəd**: İstifadəçi profilə və ayarlara aid JavaScript funksionallığı
+- **İçində**:
+  - Profile management (openProfile, saveProfile)
+  - Settings management (openSettings, saveSettings)
+  - Password change functionality
+  - Logout functionality
+  - Bootstrap offcanvas management
+  - **Bütün səhifələrdə istifadə edilir** (footer-də include edilir)
 
 ## İstifadə
 
@@ -36,6 +47,11 @@ Bu qovluq bütün JavaScript fayllarını ehtiva edir.
 @section('scripts')
   <script src="/js/home.js"></script>
 @end
+```
+
+### Footer (footer.edge)
+```html
+<script src="/js/user.js"></script>
 ```
 
 ## Utility Functions (app.js-də mövcuddur)

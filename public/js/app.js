@@ -75,6 +75,25 @@
   window.showLoading = showLoading;
   window.confirmAction = confirmAction;
 
+  // Collapse icon rotation functionality (UI animation)
+  function setupCollapseIcons() {
+    const collapseElements = document.querySelectorAll('[data-bs-toggle="collapse"]');
+    collapseElements.forEach(function(element) {
+      element.addEventListener('click', function() {
+        const target = document.querySelector(this.getAttribute('data-bs-target'));
+        const icon = this.querySelector('.collapse-icon');
+        
+        if (target && icon) {
+          if (target.classList.contains('show')) {
+            icon.style.transform = 'rotate(-90deg)';
+          } else {
+            icon.style.transform = 'rotate(0deg)';
+          }
+        }
+      });
+    });
+  }
+
   // Cache clear functionality for both desktop and mobile
   function setupCacheClearButton(buttonId) {
     const button = document.getElementById(buttonId);
@@ -452,6 +471,9 @@
     setupCacheClearButton('btnClearCache');
     setupCacheClearButton('btnClearCacheMobile');
     setupCacheClearButton('testCacheClear');
+    
+    // Setup collapse icon animations (UI functionality)
+    setupCollapseIcons();
   }
 
   $(async function init() {
