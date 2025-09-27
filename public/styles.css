@@ -58,6 +58,160 @@ body {
   }
 }
 
+/* Select2 Dark Mode Styling */
+.select2-container--default .select2-selection--single {
+  background-color: #0b1220 !important;
+  border: 1px solid #334155 !important;
+  color: #e2e8f0 !important;
+  height: 31px !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.select2-container--default.select2-container--focus .select2-selection--single {
+  border-color: #64748b !important;
+  box-shadow: none !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+  color: #e2e8f0 !important;
+  line-height: 29px !important;
+  padding-left: 8px !important;
+  padding-right: 20px !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+  height: 29px !important;
+  right: 5px !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow b {
+  border-color: #94a3b8 transparent transparent transparent !important;
+  border-style: solid !important;
+  border-width: 5px 4px 0 4px !important;
+  height: 0 !important;
+  left: 50% !important;
+  margin-left: -4px !important;
+  margin-top: -2px !important;
+  position: absolute !important;
+  top: 50% !important;
+  width: 0 !important;
+}
+
+.select2-container--default.select2-container--open .select2-selection--single .select2-selection__arrow b {
+  border-color: transparent transparent #94a3b8 transparent !important;
+  border-width: 0 4px 5px 4px !important;
+}
+
+.select2-dropdown {
+  background-color: #111827 !important;
+  border: 1px solid #334155 !important;
+  border-top: none !important;
+  z-index: 9999 !important;
+}
+
+.select2-results {
+  background-color: #111827 !important;
+}
+
+.select2-container--default .select2-results__option {
+  background-color: #111827 !important;
+  color: #e2e8f0 !important;
+  padding: 6px 12px !important;
+  border: none !important;
+}
+
+.select2-container--default .select2-results__option--highlighted {
+  background-color: #374151 !important;
+  color: #f3f4f6 !important;
+}
+
+.select2-container--default .select2-results__option--selected {
+  background-color: #1f2937 !important;
+  color: #3b82f6 !important;
+}
+
+.select2-container--default .select2-search--dropdown .select2-search__field {
+  background-color: #0b1220 !important;
+  border: 1px solid #334155 !important;
+  color: #e2e8f0 !important;
+  padding: 4px 6px !important;
+}
+
+.select2-container--default .select2-search--dropdown .select2-search__field:focus {
+  border-color: #64748b !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Select2 container sizing */
+.select2-container {
+  /* width: 100% !important; */
+}
+
+.select2-container .select2-selection--single {
+  height: auto !important;
+}
+
+/* Custom dark classes */
+.select2-dark-dropdown {
+  background-color: #111827 !important;
+  border-color: #334155 !important;
+}
+
+.select2-dark-selection {
+  background-color: #0b1220 !important;
+  border-color: #334155 !important;
+}
+
+/* Additional improvements for dropdown visibility */
+.select2-dropdown .select2-results {
+  max-height: 200px !important;
+  overflow-y: auto !important;
+}
+
+.select2-container--default .select2-results__options {
+  background-color: #111827 !important;
+}
+
+/* Select2 scrollbar dark styling */
+.select2-results__options {
+  scrollbar-width: thin !important;
+  scrollbar-color: #4b5563 #1f2937 !important;
+}
+
+.select2-results__options::-webkit-scrollbar {
+  width: 8px !important;
+}
+
+.select2-results__options::-webkit-scrollbar-track {
+  background: #1f2937 !important;
+}
+
+.select2-results__options::-webkit-scrollbar-thumb {
+  background: #4b5563 !important;
+  border-radius: 4px !important;
+}
+
+.select2-results__options::-webkit-scrollbar-thumb:hover {
+  background: #6b7280 !important;
+}
+
+/* Mobile select2 improvements */
+@media (max-width: 576px) {
+  .select2-container--default .select2-selection--single {
+    font-size: 14px !important;
+  }
+  
+  .select2-dropdown {
+    font-size: 14px !important;
+  }
+  
+  .select2-container--default .select2-results__option {
+    padding: 8px 12px !important;
+  }
+}
+
 @media (max-width: 360px) {
   #tvchart { height: 300px !important; }
   #rsichart { height: 100px !important; }

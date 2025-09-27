@@ -3,7 +3,7 @@
   
   const intervals = ['1m','3m','5m','15m','30m','1h','2h','4h','6h','8h','12h','1d','3d','1w','1M'];
   const PREFS_KEY = 'scalp_prefs_v1';
-
+  
   // Utility math functions
   function toBar(k) {
     return { time: Math.floor(k[0] / 1000), open: +k[1], high: +k[2], low: +k[3], close: +k[4], volume: +k[5] };
@@ -127,10 +127,7 @@
         $sel.select2({
           width: 'style',
           dropdownAutoWidth: true,
-          minimumResultsForSearch: 0,
-          theme: 'default',
-          dropdownCssClass: 'select2-dark-dropdown',
-          selectionCssClass: 'select2-dark-selection'
+          minimumResultsForSearch: 0
         });
       }
     } catch (e) {
