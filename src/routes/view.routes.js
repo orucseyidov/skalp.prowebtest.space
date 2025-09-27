@@ -11,12 +11,20 @@ router.get('/login', (_req, res) => {
 
 // Direct /index.html access should respect auth
 router.get('/index.html', requireAuth, (req, res) => {
-  return res.render('pages/home', { title: 'Skalp Ticarət', currentPage: 'home' });
+  return res.render('pages/home', { 
+    title: 'Skalp Ticarət', 
+    currentPage: 'home',
+    user: req.session.user 
+  });
 });
 
 // Test page route
 router.get('/test', requireAuth, (req, res) => {
-  return res.render('pages/test', { title: 'Skalp Test Səhifəsi', currentPage: 'test' });
+  return res.render('pages/test', { 
+    title: 'Skalp Test Səhifəsi', 
+    currentPage: 'test',
+    user: req.session.user 
+  });
 });
 
 // Root route with auth check
@@ -24,12 +32,20 @@ router.get('/', (req, res) => {
   if (!req.session || !req.session.user) {
     return res.sendFile(path.join(__dirname, '../../public', 'login.html'));
   }
-  return res.render('pages/home', { title: 'Skalp Ticarət', currentPage: 'home' });
+  return res.render('pages/home', { 
+    title: 'Skalp Ticarət', 
+    currentPage: 'home',
+    user: req.session.user 
+  });
 });
 
 // Fallback - must be last
 router.get('*', requireAuth, (req, res) => {
-  return res.render('pages/home', { title: 'Skalp Ticarət', currentPage: 'home' });
+  return res.render('pages/home', { 
+    title: 'Skalp Ticarət', 
+    currentPage: 'home',
+    user: req.session.user 
+  });
 });
 
 module.exports = router;

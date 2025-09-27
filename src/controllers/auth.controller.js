@@ -1,17 +1,18 @@
 const bcrypt = require('bcrypt');
-const { getPool } = require('../config/db');
+const UserRepository = require('../repositories/user.repository');
 const asyncHandler = require('../utils/asyncHandler');
 
 exports.login = asyncHandler(async (req, res) => {
   const { email, password } = req.body || {};
   if (!email || !password) return res.status(400).json({ error: 'Email və şifrə tələb olunur' });
-  const pool = await getPool();
-  const [rows] = await pool.query('SELECT * FROM users WHERE email=?', [email]);
-  const user = rows[0];
+  
+  const user = await UserRepository.findByEmail(email);
   if (!user) return res.status(401).json({ error: 'İstifadəçi tapılmadı' });
+  
   const ok = await bcrypt.compare(password, user.password_hash);
   if (!ok) return res.status(401).json({ error: 'Yanlış şifrə' });
-  req.session.user = { id: user.id, fullName: user.full_name, email: user.email };
+  
+  req.session.user = { id: user.id, full_name: user.full_name, email: user.email };
   res.json({ ok: true, user: req.session.user });
 });
 

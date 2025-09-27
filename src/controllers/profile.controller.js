@@ -1,4 +1,5 @@
-const { getPool } = require('../config/db');
+const UserRepository = require('../repositories/user.repository');
+const UserSettingsRepository = require('../repositories/user-settings.repository');
 const bcrypt = require('bcrypt');
 const asyncHandler = require('../utils/asyncHandler');
 
@@ -7,10 +8,10 @@ const asyncHandler = require('../utils/asyncHandler');
  */
 exports.getProfile = asyncHandler(async (req, res) => {
   const userId = req.session.user.id;
-  const pool = await getPool();
-  const [rows] = await pool.query('SELECT id, full_name, email, created_at FROM users WHERE id = ?', [userId]);
-  const data = rows[0];
-  res.json({ success: true, data });
+  const user = await UserRepository.findById(userId);
+  if (!user) return res.status(404).json({ error: 'İstifadəçi tapılmadı' });
+  
+  res.json({ success: true, data: user });
 });
 
 /**
@@ -27,18 +28,29 @@ exports.updateProfile = asyncHandler(async (req, res) => {
     });
   }
   
-  const pool = await getPool();
-  await pool.query('UPDATE users SET full_name=?, email=? WHERE id=?', [
-    String(full_name).trim(), 
-    String(email).trim(), 
-    userId
-  ]);
+  // Check if email already exists for another user
+  const emailExists = await UserRepository.emailExists(email, userId);
+  if (emailExists) {
+    return res.status(400).json({
+      success: false,
+      message: 'Bu email artıq istifadə olunur'
+    });
+  }
+  
+  const updatedUser = await UserRepository.updateProfile(userId, {
+    full_name: String(full_name).trim(),
+    email: String(email).trim()
+  });
+  
+  if (!updatedUser) {
+    return res.status(404).json({ error: 'İstifadəçi tapılmadı' });
+  }
   
   // Update session
-  req.session.user.fullName = String(full_name).trim();
-  req.session.user.email = String(email).trim();
+  req.session.user.fullName = updatedUser.full_name;
+  req.session.user.email = updatedUser.email;
   
-  res.json({ success: true });
+  res.json({ success: true, data: updatedUser });
 });
 
 /**
@@ -46,17 +58,11 @@ exports.updateProfile = asyncHandler(async (req, res) => {
  */
 exports.getSettings = asyncHandler(async (req, res) => {
   const userId = req.session.user.id;
-  const pool = await getPool();
   
   // Ensure user_settings record exists
-  await pool.query('INSERT IGNORE INTO user_settings (user_id) VALUES (?)', [userId]);
+  const settings = await UserSettingsRepository.ensureExists(userId);
   
-  const [rows] = await pool.query(
-    'SELECT gpt_token, gpt_key, deepseek_token, deepseek_key, binance_token, binance_key, binance_user_code FROM user_settings WHERE user_id=?', 
-    [userId]
-  );
-  
-  res.json({ success: true, data: rows[0] || {} });
+  res.json({ success: true, data: settings || {} });
 });
 
 /**
@@ -74,31 +80,17 @@ exports.updateSettings = asyncHandler(async (req, res) => {
     binance_user_code 
   } = req.body || {};
   
-  const pool = await getPool();
-  await pool.query(
-    `INSERT INTO user_settings (user_id, gpt_token, gpt_key, deepseek_token, deepseek_key, binance_token, binance_key, binance_user_code)
-     VALUES (?,?,?,?,?,?,?,?)
-     ON DUPLICATE KEY UPDATE 
-       gpt_token=VALUES(gpt_token), 
-       gpt_key=VALUES(gpt_key), 
-       deepseek_token=VALUES(deepseek_token), 
-       deepseek_key=VALUES(deepseek_key), 
-       binance_token=VALUES(binance_token), 
-       binance_key=VALUES(binance_key), 
-       binance_user_code=VALUES(binance_user_code)`,
-    [
-      userId, 
-      gpt_token || null, 
-      gpt_key || null, 
-      deepseek_token || null, 
-      deepseek_key || null, 
-      binance_token || null, 
-      binance_key || null, 
-      binance_user_code || null
-    ]
-  );
+  const updatedSettings = await UserSettingsRepository.update(userId, {
+    gpt_token: gpt_token || null,
+    gpt_key: gpt_key || null,
+    deepseek_token: deepseek_token || null,
+    deepseek_key: deepseek_key || null,
+    binance_token: binance_token || null,
+    binance_key: binance_key || null,
+    binance_user_code: binance_user_code || null
+  });
   
-  res.json({ success: true });
+  res.json({ success: true, data: updatedSettings });
 });
 
 /**
@@ -130,13 +122,9 @@ exports.changePassword = asyncHandler(async (req, res) => {
     });
   }
   
-  const pool = await getPool();
-  
   // Get current password hash
-  const [rows] = await pool.query('SELECT password_hash FROM users WHERE id=?', [userId]);
-  const hash = rows[0]?.password_hash;
-  
-  if (!hash) {
+  const currentHash = await UserRepository.getPasswordHash(userId);
+  if (!currentHash) {
     return res.status(400).json({ 
       success: false, 
       message: 'İstifadəçi tapılmadı' 
@@ -144,7 +132,7 @@ exports.changePassword = asyncHandler(async (req, res) => {
   }
   
   // Verify old password
-  const ok = await bcrypt.compare(String(oldPassword), hash);
+  const ok = await bcrypt.compare(String(oldPassword), currentHash);
   if (!ok) {
     return res.status(401).json({ 
       success: false, 
@@ -154,7 +142,14 @@ exports.changePassword = asyncHandler(async (req, res) => {
   
   // Hash new password and update
   const newHash = await bcrypt.hash(String(newPassword), 10);
-  await pool.query('UPDATE users SET password_hash=? WHERE id=?', [newHash, userId]);
+  const success = await UserRepository.updatePassword(userId, newHash);
+  
+  if (!success) {
+    return res.status(500).json({ 
+      success: false, 
+      message: 'Şifrə yenilənmədi' 
+    });
+  }
   
   res.json({ success: true });
 });

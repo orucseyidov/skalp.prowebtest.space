@@ -36,6 +36,26 @@ body {
 
   /* Inline controls stack nicely */
   .card .d-flex.flex-wrap.gap-3 { gap: 0.5rem !important; }
+  
+  /* Header cache clear button responsive */
+  #btnClearCache {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+  }
+  
+  /* Mobile cache clear button */
+  #btnClearCacheMobile {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.4rem;
+  }
+  
+  /* Make header buttons stack on very small screens */
+  @media (max-width: 992px) {
+    .d-none.d-lg-flex.gap-2 {
+      flex-wrap: wrap;
+      gap: 0.5rem !important;
+    }
+  }
 }
 
 @media (max-width: 360px) {

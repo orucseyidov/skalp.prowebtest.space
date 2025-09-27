@@ -99,7 +99,9 @@ src/
 ├── controllers/           # API controller-ləri
 │   ├── auth.controller.js
 │   ├── binance.controller.js # Binance API controller
+│   ├── cache.controller.js # Cache management controller
 │   ├── me.controller.js
+│   ├── profile.controller.js # Profile management controller
 │   └── user.controller.js
 ├── database/
 │   ├── migrations/        # Veritabanı migration-ları
@@ -117,6 +119,11 @@ src/
 │   └── ErrorHandler.js   # Global error handler
 ├── models/               # Veritabanı modelləri
 ├── repositories/         # Data access layer
+│   ├── user.repository.js # User database operations
+│   ├── user-settings.repository.js # User settings operations
+│   └── user.repository.contract.js # User repository interface
+├── queries/              # Complex SQL queries
+│   └── dashboard-stats.query.js # Dashboard statistics
 ├── routes/               # API route-ları
 │   ├── index.js          # Ana route giriş noktası
 │   ├── auth.routes.js    # Auth endpoint-ləri

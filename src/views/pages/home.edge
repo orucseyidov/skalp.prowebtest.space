@@ -2,62 +2,7 @@
 @set('title', 'Skalp Ticaret | əsas sehife')
 
 @section('content')
-  <!-- inline indicators bar -->
-  <div class="container-fluid py-2">
-    <div class="card">
-      <div class="card-body">
-        <div class="row">
-          <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
-            <!-- Digər ayarlar (boş) -->
-            <div class="d-flex flex-wrap gap-3 align-items-start small">
-              <div class="form-check form-switch m-0">
-                <input class="form-check-input" type="checkbox" id="aoutoReloadToggle">
-                <label class="form-check-label" for="aoutoReloadToggle" data-bs-toggle="tooltip" title="Əgər bu açıqdırsa seçilmiş zaman çərçivəsində yenilənəcək">
-                  Yeniləmə
-                </label>
-              </div>
-            </div>
-          </div>
-          <div class="col-lg-8 col-md-8 col-sm-12 col-xs-12">
-            <div class="d-flex flex-wrap gap-3 align-items-end small">
-              <div class="d-flex align-items-center gap-2">
-                <div class="form-check form-switch m-0">
-                  <input class="form-check-input" type="checkbox" id="rsiToggle" checked>
-                  <label class="form-check-label" for="rsiToggle" data-bs-toggle="tooltip" title="RSI – 0-100 şkalası; 30 aşırı satım, 70 aşırı alış zonası.">RSI</label>
-                </div>
-                <input type="number" id="rsiPeriod" class="form-control form-control-sm" value="14" min="2" max="100" style="width:90px" />
-              </div>
-              <div class="d-flex align-items-center gap-2">
-                <div class="form-check form-switch m-0">
-                  <input class="form-check-input" type="checkbox" id="ma7Toggle" checked>
-                  <label class="form-check-label" for="ma7Toggle" data-bs-toggle="tooltip" title="MA 7 – qısa müddətli trend izləyici.">MA 7</label>
-                </div>
-                <input type="number" id="ma7Period" class="form-control form-control-sm" value="7" min="2" max="300" style="width:90px" />
-              </div>
-              <div class="d-flex align-items-center gap-2">
-                <div class="form-check form-switch m-0">
-                  <input class="form-check-input" type="checkbox" id="ma25Toggle" checked>
-                  <label class="form-check-label" for="ma25Toggle" data-bs-toggle="tooltip" title="MA 25 – orta müddətli istiqamət.">MA 25</label>
-                </div>
-                <input type="number" id="ma25Period" class="form-control form-control-sm" value="25" min="2" max="500" style="width:90px" />
-              </div>
-              <div class="d-flex align-items-center gap-2">
-                <div class="form-check form-switch m-0">
-                  <input class="form-check-input" type="checkbox" id="ma99Toggle" checked>
-                  <label class="form-check-label" for="ma99Toggle" data-bs-toggle="tooltip" title="MA 99 – uzun müddətli meyl.">MA 99</label>
-                </div>
-                <input type="number" id="ma99Period" class="form-control form-control-sm" value="99" min="2" max="1000" style="width:90px" />
-              </div>
-              <div class="form-check form-switch m-0">
-                <input class="form-check-input" type="checkbox" id="emaMode" checked>
-                <label class="form-check-label" for="emaMode" data-bs-toggle="tooltip" title="EMA – eksponensial hərəkətli orta; söndürsəniz SMA tətbiq olunur.">EMA</label>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+  @include('partials/indicators-bar')
 
   <div class="container-fluid pb-3">
     <div class="row g-3">
@@ -138,6 +83,82 @@
 @endsection
 
 @section('scripts')
-  <!-- elave js kodlar -->
+  <script>
+    // Cache clear functionality for both desktop and mobile
+    function setupCacheClearButton(buttonId) {
+      const button = document.getElementById(buttonId);
+      if (button) {
+        button.addEventListener('click', function() {
+          Swal.fire({
+            title: 'Keşi silmək istəyirsiniz?',
+            text: "Bu əməliyyat bütün keş məlumatlarını siləcək və səhifəni yeniləyəcək!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Bəli, sil!',
+            cancelButtonText: 'Ləğv et',
+            reverseButtons: true
+          }).then((result) => {
+            if (result.isConfirmed) {
+              // Show loading
+              Swal.fire({
+                title: 'Keş silinir...',
+                text: 'Zəhmət olmasa gözləyin',
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                willOpen: () => {
+                  Swal.showLoading();
+                }
+              });
+
+              // Call cache clear API
+              fetch('/api/cache/clear', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                credentials: 'same-origin'
+              })
+              .then(response => response.json())
+              .then(data => {
+                if (data.success) {
+                  Swal.fire({
+                    title: 'Uğurlu!',
+                    text: 'Keş uğurla silindi',
+                    icon: 'success',
+                    confirmButtonText: 'Tamam'
+                  }).then(() => {
+                    // Reload the page to refresh all data
+                    window.location.reload();
+                  });
+                } else {
+                  Swal.fire({
+                    title: 'Xəta!',
+                    text: data.message || 'Keş silinərkən xəta baş verdi',
+                    icon: 'error',
+                    confirmButtonText: 'Tamam'
+                  });
+                }
+              })
+              .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                  title: 'Xəta!',
+                  text: 'Keş silinərkən xəta baş verdi',
+                  icon: 'error',
+                  confirmButtonText: 'Tamam'
+                });
+              });
+            }
+          });
+        });
+      }
+    }
+
+    // Setup both desktop and mobile cache clear buttons
+    setupCacheClearButton('btnClearCache');
+    setupCacheClearButton('btnClearCacheMobile');
+  </script>
 @end
 
