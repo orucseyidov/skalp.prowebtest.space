@@ -6,9 +6,12 @@
   let ws;
   let current = { symbol: 'SOLUSDT', interval: '1m', limit: 500 };
   let lastData = [];
+  
+  // Make variables globally available for home.js
+  window.currentSymbol = current.symbol;
+  window.lastData = lastData;
   let indicatorCache = { ema: {}, sma: {}, rsi: {} };
   let autoTimer = null;
-  let scalpLoadingCount = 0;
   const PREFS_KEY = 'scalp_prefs_v1';
 
   function readPrefs() {
@@ -17,6 +20,101 @@
   function writePrefs(partial) {
     const cur = readPrefs();
     localStorage.setItem(PREFS_KEY, JSON.stringify({ ...cur, ...partial }));
+  }
+  // Make writePrefs globally available for home.js
+  window.writePrefs = writePrefs;
+
+  // Utility functions
+  function showSuccess(message) {
+    Swal.fire({
+      title: 'Uğurlu!',
+      text: message,
+      icon: 'success',
+      confirmButtonText: 'Tamam'
+    });
+  }
+
+  function showError(message) {
+    Swal.fire({
+      title: 'Xəta!',
+      text: message,
+      icon: 'error',
+      confirmButtonText: 'Tamam'
+    });
+  }
+
+  function showLoading(title = 'Yüklənir...', text = 'Zəhmət olmasa gözləyin') {
+    return Swal.fire({
+      title: title,
+      text: text,
+      allowOutsideClick: false,
+      showConfirmButton: false,
+      willOpen: () => {
+        Swal.showLoading();
+      }
+    });
+  }
+
+  function confirmAction(title, text, confirmText = 'Bəli', cancelText = 'Ləğv et') {
+    return Swal.fire({
+      title: title,
+      text: text,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: confirmText,
+      cancelButtonText: cancelText,
+      reverseButtons: true
+    });
+  }
+
+  // Make utility functions globally available
+  window.showSuccess = showSuccess;
+  window.showError = showError;
+  window.showLoading = showLoading;
+  window.confirmAction = confirmAction;
+
+  // Cache clear functionality for both desktop and mobile
+  function setupCacheClearButton(buttonId) {
+    const button = document.getElementById(buttonId);
+    if (button) {
+      button.addEventListener('click', function() {
+        confirmAction(
+          'Keşi silmək istəyirsiniz?',
+          "Bu əməliyyat bütün keş məlumatlarını siləcək və səhifəni yeniləyəcək!",
+          'Bəli, sil!',
+          'Ləğv et'
+        ).then((result) => {
+          if (result.isConfirmed) {
+            showLoading('Keş silinir...', 'Zəhmət olmasa gözləyin');
+
+            // Call cache clear API
+            fetch('/api/cache/clear', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              credentials: 'same-origin'
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                showSuccess('Keş uğurla silindi').then(() => {
+                  window.location.reload();
+                });
+              } else {
+                showError(data.message || 'Keş silinərkən xəta baş verdi');
+              }
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              showError('Keş silinərkən xəta baş verdi');
+            });
+          }
+        });
+      });
+    }
   }
   function applyPrefsToUI() {
     const p = readPrefs();
@@ -236,9 +334,10 @@
       const data = await $.getJSON('/api/klines', current);
       const bars = data.map(toBar);
       lastData = bars;
+      window.lastData = lastData; // Update global reference
       drawSeries(bars);
       connectWs();
-      refreshScalp();
+      if (window.refreshScalp) window.refreshScalp();
     } catch (e) {
       showError('Məlumat yüklənmədi');
     }
@@ -268,92 +367,7 @@
     ws.onerror = () => {};
   }
 
-  async function refreshScalp() {
-    function fmt(n) { return (+n).toFixed(6); }
-    function renderPlan(side, entry) {
-      const tp = side === 'long' ? entry * 1.005 : entry * 0.995;
-      const sl = side === 'long' ? entry * 0.997 : entry * 1.003;
-      return (
-        `<div class="border rounded p-2 mb-2">`+
-        `<div><strong>${side === 'long' ? 'Alış planı' : 'Satış planı'} (təxminən 30s)</strong></div>`+
-        `<div>Giriş qiyməti: <strong>${fmt(entry)}</strong></div>`+
-        `<div>Qazanc hədəfi (TP): <strong>${fmt(tp)}</strong> (${side === 'long' ? '+0.5%' : '-0.5%'})</div>`+
-        `<div>Zərər dayandır (SL): <strong>${fmt(sl)}</strong> (${side === 'long' ? '-0.3%' : '+0.3%'})</div>`+
-        `</div>`
-      );
-    }
-    try {
-      scalpLoadingCount++;
-      $('#scalpLoading').removeClass('d-none');
-      const tf = $('#scalpTf').val() || '30s';
-      const resp = await $.getJSON('/api/scalp30s', { symbol: current.symbol, tf });
-      $('#scalpMode').text(resp.mode);
-      $('#scalpTrend').text(resp.trend);
-      $('#scalpSignal').text(resp.signal);
-      if (resp.suggestion) {
-        const s = resp.suggestion;
-        const planHtml = renderPlan(s.side, s.entry);
-        $('#scalpSuggestion').html(planHtml + `<div class="small text-secondary">Risk/Mükafat nisbəti: ${s.rr}. Müddət: təxminən 30s.</div>`);
-      } else {
-        const last = lastData.length ? lastData[lastData.length - 1].close : null;
-        if (last) {
-          const both = renderPlan('long', last) + renderPlan('short', last);
-          $('#scalpSuggestion').html(both + `<div class="small text-secondary">Aydın siqnal yoxdur; qiymət əsaslı sürətli planlar. Müddət: təxminən 30s.</div>`);
-        } else {
-          $('#scalpSuggestion').text('-');
-        }
-      }
-    } catch (e) {
-      $('#scalpMode').text('-');
-      $('#scalpTrend').text('-');
-      $('#scalpSignal').text('N/A');
-      const last = lastData.length ? lastData[lastData.length - 1].close : null;
-      if (last) {
-        const both = renderPlan('long', last) + renderPlan('short', last);
-        $('#scalpSuggestion').html(both + `<div class="small text-secondary">Hesablama alınmadı; yerli qiymət əsaslı planlar. Müddət: təxminən 30s.</div>`);
-      } else {
-        $('#scalpSuggestion').text('Hesablama alınmadı');
-      }
-    } finally {
-      scalpLoadingCount = Math.max(0, scalpLoadingCount - 1);
-      if (scalpLoadingCount === 0) $('#scalpLoading').addClass('d-none');
-    }
 
-    // fetch context coins AFTER spinner is settled so loader does not block
-    try {
-      const tf = $('#scalpTf').val() || '30s';
-      const ai = await $.getJSON('/api/deepseek', { symbol: current.symbol, tf });
-      const stats = ai.stats || {};
-      const lines = Object.entries(stats).map(([s, st]) => `${s}: ${st.lastClose != null ? st.lastClose.toFixed(6) : '-'} (${st.changePct != null ? (st.changePct>=0?'+':'')+st.changePct.toFixed(2)+'%' : '-'})`);
-      if (lines.length) {
-        $('#scalpContext').html(`<div class="small text-secondary">Nəzərə alınan simvollar:</div><pre class="mb-0">${lines.join('\n')}</pre>`);
-      } else {
-        $('#scalpContext').empty();
-      }
-    } catch { $('#scalpContext').empty(); }
-  }
-
-  async function refreshAI(showLoadingText = false) {
-    try {
-      $('#aiLoading').removeClass('d-none');
-      const tf = $('#scalpTf').val() || '30s';
-      const symbol = current.symbol;
-      if (showLoadingText) $('#aiAnalysis').text('Analiz olunur...');
-      const resp = await $.getJSON('/api/deepseek', { symbol, tf });
-      let header = '';
-      if (resp.stats) {
-        const lines = Object.entries(resp.stats).map(([s, st]) => {
-          const last = st.lastClose != null ? st.lastClose.toFixed(6) : '-';
-          const pct = st.changePct != null ? (st.changePct >= 0 ? '+' : '') + st.changePct.toFixed(2) + '%' : '-';
-          return `${s}: son qiymət ${last} (${pct})`;
-        });
-        header = lines.join('\n') + '\n\n';
-      }
-      $('#aiAnalysis').text(header + (resp.analysis || '-'));
-    } catch (e) {
-      $('#aiAnalysis').text('AI analizi alınmadı');
-    } finally { $('#aiLoading').addClass('d-none'); }
-  }
 
   function tfToMs(tf) {
     const map = {
@@ -380,8 +394,8 @@
     const tf = $('#scalpTf').val() || '30s';
     const periodMs = tfToMs(tf);
     autoTimer = setInterval(() => {
-      refreshScalp();
-      refreshAI();
+      if (window.refreshScalp) window.refreshScalp();
+      if (window.refreshAI) window.refreshAI();
     }, periodMs);
   }
 
@@ -391,6 +405,8 @@
       current.interval = $('#interval').val();
       current.limit = Math.min(Math.max(parseInt($('#limit').val(), 10) || 500, 50), 1000);
       writePrefs({ symbol: current.symbol, interval: current.interval, limit: current.limit });
+      // Update global variables for home.js
+      window.currentSymbol = current.symbol;
       loadData();
     });
     $('#symbol, #interval').on('change', () => {
@@ -411,14 +427,15 @@
       });
       if (lastData.length) drawSeries(lastData);
     });
-    $('#btnScalpRefresh').on('click', () => refreshScalp());
-    $('#scalpTf').on('change', () => { writePrefs({ scalpTf: $('#scalpTf').val() }); refreshScalp(); refreshAI(false); setupAutoReload(); });
     $('#aoutoReloadToggle').on('change', () => { writePrefs({ autoReload: $('#aoutoReloadToggle').is(':checked') }); setupAutoReload(); });
-    $('#btnAiAnalyze').on('click', () => refreshAI(true));
     window.addEventListener('resize', () => chart && chart.timeScale().fitContent());
     // init tooltips
     const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     tooltipTriggerList.forEach((el) => { new bootstrap.Tooltip(el); });
+    
+    // Setup cache clear buttons (available on all pages)
+    setupCacheClearButton('btnClearCache');
+    setupCacheClearButton('btnClearCacheMobile');
   }
 
   $(async function init() {
@@ -429,7 +446,7 @@
     bindEvents();
     $('#btnLoad').click();
     // initial AI analysis with loading text
-    refreshAI(true);
+    if (window.refreshAI) window.refreshAI(true);
     setupAutoReload();
   });
 })();
