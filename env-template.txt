@@ -1,0 +1,64 @@
+# ===========================================
+# SKALP TRADER - ENVIRONMENT CONFIGURATION
+# ===========================================
+# Bu faylı .env adı ilə kopyalayın və dəyərləri dəyişdirin
+
+# Application Environment
+NODE_ENV=development
+PORT=3000
+
+# Database Configuration (MySQL/MariaDB)
+# MySQL is running locally with root user and no password
+DB_HOST=localhost
+DB_USER=root
+DB_PASS=
+DB_NAME=skalp
+DB_PORT=3306
+
+# Session Configuration
+SESSION_SECRET=your_very_secure_session_secret_key_here_change_this_in_production
+
+# DeepSeek AI API Configuration
+DEEPSEEK_API_KEY=sk-20cffc24a1f54a12bf20f07623db7859
+
+# Binance API Configuration (Optional - for authenticated endpoints)
+# BINANCE_API_KEY=your_binance_api_key_here
+# BINANCE_SECRET_KEY=your_binance_secret_key_here
+
+# Security Configuration
+# JWT_SECRET=your_jwt_secret_for_future_use
+# BCRYPT_ROUNDS=12
+
+# Rate Limiting Configuration
+# RATE_LIMIT_WINDOW_MS=900000
+# RATE_LIMIT_MAX_REQUESTS=100
+
+# CORS Configuration
+# CORS_ORIGIN=http://localhost:3000
+
+# Logging Configuration
+# LOG_LEVEL=info
+# LOG_FILE=logs/app.log
+
+# Cache Configuration (for future use)
+# REDIS_URL=redis://localhost:6379
+# CACHE_TTL=3600
+
+# Email Configuration (for future use)
+# SMTP_HOST=smtp.gmail.com
+# SMTP_PORT=587
+# SMTP_USER=your_email@gmail.com
+# SMTP_PASS=your_app_password
+
+# File Upload Configuration (for future use)
+# MAX_FILE_SIZE=10485760
+# UPLOAD_PATH=uploads/
+
+# Development Tools
+# DEBUG=skalp:*
+# NODE_DEBUG=*
+
+# Production Specific
+# SSL_CERT_PATH=/path/to/cert.pem
+# SSL_KEY_PATH=/path/to/key.pem
+# TRUST_PROXY=true
